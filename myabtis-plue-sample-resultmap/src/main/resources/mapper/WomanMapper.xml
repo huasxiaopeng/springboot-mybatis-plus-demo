@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.myabtis.mapper.WomanMapper">
+
+    <resultMap id="w_r" type="com.example.myabtis.entity.Woman">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="laoGongId" column="lao_gong_id"/>
+        <association property="laoGong" column="lao_gong_id"
+                     select="com.example.myabtis.mapper.ManMapper.selectById"/>
+        <collection property="waWa" column="id"
+                    select="com.example.myabtis.mapper.ChildMapper.selectByLaoMaId"/>
+    </resultMap>
+    <select id="selectLinkWoById" resultMap="w_r">
+        select *
+        from woman
+        where id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,18 @@
+# DataSource Config
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/my-plus?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&useSSL=false&serverTimezone=UTC
+    username: root
+    password: 1234
+  application:
+    name: mybatis-plus-sample-association
+# Logger Config
+logging:
+  level:
+    mybatis.plus.sample.association: debug
+
+#myabtis 配置文件
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+

@@ -1,0 +1,24 @@
+# DataSource Config
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/my-plus?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&useSSL=false&serverTimezone=UTC
+    username: root
+    password: 1234
+  application:
+    name: page-mybatis-demo
+# Logger Config
+logging:
+  level:
+    com.example: debug
+mybatis:
+  mapper-locations:  classpath:/mapper/*Mapper.xml
+
+server:
+  port: 8082
+# 配置pagehelper参数
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql

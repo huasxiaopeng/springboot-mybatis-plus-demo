@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.mapper.UserMapper">
+    <resultMap id="userMap" type="com.example.model.SysUser">
+        <id property="id" column="id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userPassword" column="user_password"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="userInfo" column="user_info"/>
+        <result property="headImg" column="head_img" jdbcType="BLOB"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+    <!--      简单的查询-->
+    <select id="selectById" resultMap="userMap">
+        select *
+        from sys_user
+        where id = #{id}
+    </select>
+    <!--     列表查询-->
+    <select id="selectAll" resultMap="userMap">
+        SELECT id,
+               user_name     userName,
+               user_password userPassword,
+               user_email    userEmail,
+               user_info     userInfo,
+               head_img      headImg,
+               create_time   createTime
+        FROM sys_user
+
+    </select>
+    <!--    三张表关联查询 角色信息没有用户信息，所以包装一个类 SysRoleExtend-->
+    <select id="selectRolesByUserId" resultType="com.example.model.SysRoleExtend">
+        SELECT r.id,
+               r.role_name   roleName,
+               r.enabled,
+               r.create_by   createBy,
+               r.create_time createTime
+        FROM sys_user u
+                 inner join sys_user_role ur on u.id = ur.user_id
+                 inner join sys_role r on ur.role_id = r.id
+        where u.id = #{userId}
+    </select>
+
+    <select id="selectRolesByUserIdAndRoleEnabled" resultType="com.example.model.SysRole">
+        SELECT r.id,
+               r.role_name   roleName,
+               r.enabled,
+               r.create_by   createBy,
+               r.create_time createTime
+        FROM sys_user u
+                 INNER JOIN sys_user_role ur ON u.id = ur.user_id
+                 INNER JOIN sys_role r ON ur.role_id = r.id
+        WHERE u.id = #{userId}
+          AND r.enabled = #{enabled}
+
+    </select>
+    <select id="selectRolesByUserAndRole" resultType="com.example.model.SysRole">
+        SELECT r.id,
+               r.role_name   roleName,
+               r.enabled,
+               r.create_by   createBy,
+               r.create_time createTime
+        FROM sys_user u
+                 INNER JOIN sys_user_role ur ON u.id = ur.user_id
+                 INNER JOIN sys_role r ON ur.role_id = r.id
+--         使用user.id 方式赋值参数
+        WHERE u.id = #{user.id}
+          AND r.enabled = #{role.enabled}
+
+    </select>
+    <!--    简单的插入操作-->
+    <insert id="insert">
+        INSERT INTO sys_user(id, user_name, user_password, user_email, user_info, head_img, create_time)
+        VALUES (#{id}, #{userName}, #{userPassword}, #{userEmail}, #{userInfo}, #{headImg,jdbcType=BLOB},
+                #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    <!--    插入成功后返回主见id-->
+    <insert id="insertUseGeneratedKeys" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user(id, user_name, user_password, user_email, user_info, head_img, create_time)
+        VALUES (#{id}, #{userName}, #{userPassword}, #{userEmail}, #{userInfo}, #{headImg,jdbcType=BLOB},
+                #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+
+    <!--    根据id 进行更新操作-->
+    <update id="updateById">
+        UPDATE sys_user
+        SET user_name     = #{userName},
+            user_password = #{userPassword},
+            user_email    = #{userEmail},
+            user_info     = #{userInfo},
+            head_img      = #{headImg,jdbcType=BLOB},
+            create_time   = #{createTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id}
+    </update>
+
+    <!--    根据指定id 删除-->
+    <delete id="deleteById">
+        DELETE
+        FROM sys_user
+        WHERE id = #{id}
+    </delete>
+    <!--      根据对象id 进行删除  -->
+    <delete id="deleteBySysUser">
+        DELETE
+        FROM sys_user
+        WHERE id = #{id}
+    </delete>
+
+
+    <!--     根据条件动态的去生成查询-->
+    <select id="selectByUser" resultMap="userMap">
+        SELECT id,
+        user_name,
+        user_password,
+        user_email,
+        create_time
+        FROM sys_user
+        WHERE 1 = 1
+        <if test="userName!=null and userName!=''">
+            And user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="userEmail != null and userEmail != ''">
+            AND user_email = #{userEmail}
+        </if>
+    </select>
+    <!--     非空字段不进行更新-->
+    <update id="updateByIdSelective">
+        UPDATE sys_user
+        SET
+        <if test="userName != null and userName != ''">
+            user_name = #{userName},
+        </if>
+        <if test="userPassword != null and userPassword != ''">
+            user_password = #{userPassword},
+        </if>
+        <if test="userEmail != null and userEmail != ''">
+            user_email = #{userEmail},
+        </if>
+        <if test="userInfo != null and userInfo != ''">
+            user_info = #{userInfo},
+        </if>
+        <if test="headImg != null">
+            head_img = #{headImg,jdbcType=BLOB},
+        </if>
+        <if test="createTime != null">
+            create_time = #{createTime,jdbcType=TIMESTAMP},
+        </if>
+        id = #{id}
+        WHERE id = #{id}
+    </update>
+
+    <!--    往数据库表中插入数据的时候，如果某一列的参数值不为空，就使用传入的值，-->
+    <!--    如果传入的参数值为空，就使用数据库中的默认值(通常是空)，而不使用传入的空值。-->
+    <insert id="insertSelective">
+        INSERT INTO sys_user(user_name, user_password,
+        <if test="userEmail != null and userEmail != ''">
+            user_email,
+        </if>
+        user_info, head_img, create_time)
+        VALUES (#{userName},#{userPassword},
+        <if test="userEmail != null and userEmail != ''">
+            #{userEmail},
+        </if>
+        #{userInfo},#{headImg,jdbcType=BLOB},#{createTime,jdbcType=TIMESTAMP})
+    </insert>
+
+
+    <select id="selectByUserWhere" resultMap="userMap">
+        SELECT id,
+        user_name,
+        user_password,
+        user_email,
+        create_time
+        FROM sys_user
+        <where>
+            <if test="userName != null and userName != ''">
+                AND user_name LIKE CONCAT('%',#{userName},'%')
+            </if>
+            <if test="userEmail != null and userEmail != ''">
+                AND user_email = #{userEmail}
+            </if>
+        </where>
+    </select>
+
+
+    <update id="updateByIdSelectiveSet">
+        UPDATE sys_user
+        <set>
+            <if test="userName != null and userName != ''">
+                user_name = #{userName},
+            </if>
+            <if test="userPassword != null and userPassword != ''">
+                user_password = #{userPassword},
+            </if>
+            <if test="userEmail != null and userEmail != ''">
+                user_email = #{userEmail},
+            </if>
+            <if test="userInfo != null and userInfo != ''">
+                user_info = #{userInfo},
+            </if>
+            <if test="headImg != null">
+                head_img = #{headImg,jdbcType=BLOB},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            id = #{id},
+        </set>
+        WHERE id = #{id}
+    </update>
+    <!--    根据传入的id 集合查询用户-->
+    <select id="selectByIdList" resultMap="userMap">
+        SELECT id,
+        user_name,
+        user_password,
+        user_email,
+        create_time
+        FROM sys_user
+        WHERE id IN
+        <foreach collection="list" open="(" close=")" separator="," item="id" index="1">
+            #{id}
+        </foreach>
+    </select>
+
+    <!--    批量插入-->
+    <insert id="insertList" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user(user_name, user_password, user_email, user_info, head_img, create_time)
+        VALUES
+        <foreach collection="list" item="user" separator=",">
+            (#{user.userName},#{user.userPassword},#{user.userEmail},#{user.userInfo},#{user.headImg,jdbcType=BLOB},#{user.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+<!--    map方式更新数据-->
+    <update id="updateByMap">
+        UPDATE sys_user
+        SET
+        <foreach collection="userMap" item="val" index="key" separator=",">
+            ${key} = #{val}
+        </foreach>
+        WHERE id = #{userMap.id}
+    </update>
+</mapper>

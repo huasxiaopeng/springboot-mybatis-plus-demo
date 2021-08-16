@@ -1,0 +1,18 @@
+package com.example.model;
+
+import lombok.Data;
+
+/**
+ * @author lktbz
+ * @version 1.0.0
+ * @date 2021/8/4
+ * @desc  实体类
+ */
+@Data
+public class Country {
+    private Integer id;
+
+    private String countryname;
+
+    private String countrycode;
+}

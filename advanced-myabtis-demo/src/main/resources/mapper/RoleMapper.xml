@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.advanced.mapper.RoleMapper">
+    <resultMap id="roleMap" type="com.example.advanced.model.SysRole">
+        <id property="id" column="id"/>
+        <result property="roleName" column="role_name"/>
+        <result property="enabled" column="enabled"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+    <!--嵌套查询demo..-->
+    <select id="selectRoleById" resultMap="roleMap">
+        SELECT * FROM sys_role WHERE id = #{id}
+    </select>
+
+    <!--     角色所拥有的权限-->
+    <resultMap id="rolePrivilegeListMap" extends="roleMap"
+               type="com.example.advanced.model.SysRoleListExtend">
+        <collection property="sysPrivilegeList" columnPrefix="privilege_"
+                    resultMap="com.example.advanced.mapper.PrivilegeMapper.sysPrivilegeMap"/>
+    </resultMap>
+
+
+</mapper>
